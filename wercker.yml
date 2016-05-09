@@ -1,0 +1,151 @@
+box: node:4-slim
+
+dev:
+  steps:
+    - script:
+      name: setup node env
+      code: export NODE_ENV=development
+
+    - npm-install
+
+    - internal/watch:
+      code: npm start
+
+initial-build:
+  steps:
+    - install-packages:
+      packages: bzip2
+
+    - script:
+      name: setup node env
+      code: export NODE_ENV=development
+
+    - npm-install
+
+tests:
+  steps:
+    - install-packages:
+      packages: libfreetype6 libfontconfig
+
+    - script:
+      name: setup node env
+      code: export NODE_ENV=development
+
+    - script:
+      name: run tests
+      code: npm test
+
+release-build:
+  steps:
+    - script:
+      name: npm rebuild
+      code: npm rebuild
+
+    - script:
+      name: build release code
+      code: npm run build
+      
+    - script:
+      name: prepare output
+      code: mv ./build/* $WERCKER_OUTPUT_DIR
+
+push-debug:
+  steps:
+    - internal/docker-push:
+      repository: quay.io/wercker/todo-demo-debug
+      username: $DOCKER_USERNAME
+      password: $DOCKER_PASSWORD
+      registry: quay.io
+      tag: $WERCKER_GIT_BRANCH
+      working-dir: /pipeline/source
+      cmd: npm start
+
+push-release:
+  box:
+    id: nginx:alpine
+    cmd: /bin/sh
+
+  steps:
+    - script:
+      name: mv static files
+      code: |
+        rm -rf /usr/share/nginx/html/*
+        mv $WERCKER_SOURCE_DIR/* /usr/share/nginx/html
+
+    - script:
+      name: cleanup build result
+      code: |
+        rm -rf *
+        touch $WERCKER_OUTPUT_DIR/dummy
+
+    - internal/docker-push:
+      disable-sync: true
+      repository: quay.io/wercker/todo-demo-release
+      username: $DOCKER_USERNAME
+      password: $DOCKER_PASSWORD
+      registry: quay.io
+      tag: $WERCKER_GIT_COMMIT
+      cmd: nginx -g 'daemon off;'
+
+kube-initialize:
+  steps:
+    - create-file:
+      name: Create ca.pem
+      filename: ca.pem
+      content: $CA_PEM
+
+    - create-file:
+      name: Create admin.pem
+      filename: admin.pem
+      content: $ADMIN_PEM
+
+    - create-file:
+      name: Create admin-key.pem
+      filename: admin-key.pem
+      content: $ADMIN_KEY_PEM
+      
+    - script:
+      name: create controller
+      code: sh create_todo_controller.sh
+
+    - kubectl:
+      server: $KUBERNETES_MASTER
+      certificate-authority: ca.pem
+      client-certificate: admin.pem
+      client-key: admin-key.pem
+      command: create -f todo-controller.json
+      update-period: 5s
+
+    - kubectl:
+      server: $KUBERNETES_MASTER
+      certificate-authority: ca.pem
+      client-certificate: admin.pem
+      client-key: admin-key.pem
+      command: create -f todo-service.json
+      update-period: 5s
+
+kube-deploy:
+  steps:
+    - create-file:
+      name: Create ca.pem
+      filename: ca.pem
+      content: $CA_PEM
+
+    - create-file:
+      name: Create admin.pem
+      filename: admin.pem
+      content: $ADMIN_PEM
+
+    - create-file:
+      name: Create admin-key.pem
+      filename: admin-key.pem
+      content: $ADMIN_KEY_PEM        
+
+    - kubectl:
+      server: $KUBERNETES_MASTER
+      certificate-authority: ca.pem
+      client-certificate: admin.pem
+      client-key: admin-key.pem
+      command: rolling-update todo
+      image: quay.io/wercker/todo-demo-release:$WERCKER_GIT_COMMIT
+      update-period: 5s

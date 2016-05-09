@@ -1,0 +1,18 @@
+.page-container {
+    display: flex;
+    flex-direction: column;
+
+    nav ul {
+        display: flex;
+        list-style: none;
+
+        li {
+            margin: 0px 10px;
+        }
+    }
+
+    .page-content {
+        width: 100%;
+        align-self: center;
+    }
+}
