@@ -14,6 +14,10 @@ We can leverage this container for development purposes and share the container 
 The second Workflow continuous after our test pipeline and builds a production ready container that gets
 pushed to a registry.
 
-Finally, we use the [kubectl step]() to initialize the cluster and do a rolling update of our service.
+Finally, we use the [kubectl step](https://github.com/wercker/step-kubectl) to initialize the cluster and do a rolling update of our service.
 
 You can see a visual representation of the Workflows below.
+
+![image](kubernetes-workflow.png)
+
+
