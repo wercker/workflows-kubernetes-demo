@@ -1,4 +1,4 @@
-##  React Todo Redux
+##  Wercker Workflows, Quay and Kubernetes sample application
 
 Sample Todo application that showcases [Wercker Workflows](http://wercker.com/workflows/) in action alongside [Kubernetes](http://kubernetes.io) and [CoreOS Quay.io](http://quay.io)
 
