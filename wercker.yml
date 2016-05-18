@@ -11,7 +11,7 @@ dev:
     - internal/watch:
       code: npm start
 
-initial-build:
+build:
   steps:
     - install-packages:
       packages: bzip2
@@ -38,13 +38,17 @@ tests:
 release-build:
   steps:
     - script:
+      name: forward deployment scripts
+      code: mv "deployment" "$WERCKER_OUTPUT_DIR"
+
+    - script:
       name: npm rebuild
       code: npm rebuild
 
     - script:
       name: build release code
       code: npm run build
-      
+
     - script:
       name: prepare output
       code: mv ./build/* $WERCKER_OUTPUT_DIR
@@ -67,6 +71,10 @@ push-release:
 
   steps:
     - script:
+      name: forward deployment scripts
+      code: mv "deployment" "$WERCKER_OUTPUT_DIR"
+
+    - script:
       name: mv static files
       code: |
         rm -rf /usr/share/nginx/html/*
@@ -74,9 +82,7 @@ push-release:
 
     - script:
       name: cleanup build result
-      code: |
-        rm -rf *
-        touch $WERCKER_OUTPUT_DIR/dummy
+      code: rm -rf *
 
     - internal/docker-push:
       disable-sync: true
@@ -104,25 +110,12 @@ kube-initialize:
       filename: admin-key.pem
       content: $ADMIN_KEY_PEM
       
-    - script:
-      name: create controller
-      code: sh create_todo_controller.sh
-
     - kubectl:
       server: $KUBERNETES_MASTER
       certificate-authority: ca.pem
       client-certificate: admin.pem
       client-key: admin-key.pem
-      command: create -f todo-controller.json
-      update-period: 5s
-
-    - kubectl:
-      server: $KUBERNETES_MASTER
-      certificate-authority: ca.pem
-      client-certificate: admin.pem
-      client-key: admin-key.pem
-      command: create -f todo-service.json
-      update-period: 5s
+      command: create -f deploymen/todo-service.yml
 
 kube-deploy:
   steps:
@@ -141,11 +134,14 @@ kube-deploy:
       filename: admin-key.pem
       content: $ADMIN_KEY_PEM        
 
+    - script:
+      cwd: deployment
+      name: template deployment
+      code: ./t.sh todo-deployment.template.yml > todo-deployment.yml
+
     - kubectl:
       server: $KUBERNETES_MASTER
       certificate-authority: ca.pem
       client-certificate: admin.pem
       client-key: admin-key.pem
-      command: rolling-update todo
-      image: quay.io/wercker/todo-demo-release:$WERCKER_GIT_COMMIT
-      update-period: 5s
+      command: apply -f deployment/todo-deployment.yml
