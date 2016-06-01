@@ -19,5 +19,3 @@ Finally, we use the [kubectl step](https://github.com/wercker/step-kubectl) to i
 You can see a visual representation of the Workflows below.
 
 ![image](kubernetes-workflow.png)
-
-
