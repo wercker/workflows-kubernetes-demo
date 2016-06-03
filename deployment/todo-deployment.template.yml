@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: todo
-        image: quay.io/wercker/todo-demo-release:${WERCKER_GIT_COMMIT}
+        image: quay.io/wercker/workflows-kubernetes-demo:${TPL_ENVIRONMENT:-release}-${WERCKER_GIT_COMMIT}
         ports:
         - name: http-server
           containerPort: 80
