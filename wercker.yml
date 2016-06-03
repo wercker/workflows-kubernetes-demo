@@ -56,11 +56,11 @@ release-build:
 push-debug:
   steps:
     - internal/docker-push:
-      repository: quay.io/wercker/todo-demo-debug
+      repository: quay.io/wercker/workflows-kubernetes-demo
       username: $DOCKER_USERNAME
       password: $DOCKER_PASSWORD
       registry: quay.io
-      tag: $WERCKER_GIT_BRANCH
+      tag: debug-$WERCKER_GIT_COMMIT
       working-dir: /pipeline/source
       cmd: npm start
 
@@ -86,11 +86,11 @@ push-release:
 
     - internal/docker-push:
       disable-sync: true
-      repository: quay.io/wercker/todo-demo-release
+      repository: quay.io/wercker/workflows-kubernetes-demo
       username: $DOCKER_USERNAME
       password: $DOCKER_PASSWORD
       registry: quay.io
-      tag: $WERCKER_GIT_COMMIT
+      tag: release-$WERCKER_GIT_COMMIT
       cmd: nginx -g 'daemon off;'
 
 kube-deploy:
