@@ -1,3 +1,5 @@
+[![wercker status](https://app.wercker.com/status/ef93005aca09f4ee6e5315d20cd34133/s/master "wercker status")](https://app.wercker.com/project/byKey/ef93005aca09f4ee6e5315d20cd34133)
+
 ##  Wercker Workflows, Quay and Kubernetes sample application
 
 Sample Todo application that showcases [Wercker Workflows](http://wercker.com/workflows/) in action alongside [Kubernetes](http://kubernetes.io) and [CoreOS Quay.io](http://quay.io)
