@@ -13,6 +13,10 @@ dev:
 
 build:
   steps:
+    - script:
+      name: upgrade packages
+      code: apt-get update && apt-get upgrade -y
+
     - install-packages:
       packages: bzip2
 
