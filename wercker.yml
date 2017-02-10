@@ -86,7 +86,7 @@ push-release:
 
     - internal/docker-push:
       disable-sync: true
-      repository: quay.io/wercker/workflows-kubernetes-demo
+      repository: quay.io/strataconsulting/workflows-kubernetes-demo
       username: $DOCKER_USERNAME
       password: $DOCKER_PASSWORD
       registry: quay.io
