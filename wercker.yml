@@ -95,24 +95,6 @@ push-release:
 
 kube-deploy:
   steps:
-    - create-file:
-      name: Create ca.pem
-      cwd: deployment
-      filename: ca.pem
-      content: $CA_PEM
-
-    - create-file:
-      name: Create admin.pem
-      cwd: deployment
-      filename: admin.pem
-      content: $ADMIN_PEM
-
-    - create-file:
-      name: Create admin-key.pem
-      cwd: deployment
-      filename: admin-key.pem
-      content: $ADMIN_KEY_PEM        
-
     - script:
       name: generate kube file
       cwd: deployment
@@ -124,9 +106,9 @@ kube-deploy:
     - kubectl:
       cwd: deployment
       server: $KUBERNETES_MASTER
-      certificate-authority: ca.pem
-      client-certificate: admin.pem
-      client-key: admin-key.pem
+      username: $KUBERNETES_USERNAME
+      password: $KUBERNETES_PASSWORD
+      insecure-skip-tls-verify: true
       command: apply -f todo-kube.yml
 
     - script:
