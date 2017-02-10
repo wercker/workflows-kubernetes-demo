@@ -101,7 +101,7 @@ kube-deploy-debug:
       code: |
         cat todo-service.yml >> todo-kube-debug.yml
         ./t.sh todo-deployment.template.yml >> todo-kube-debug.yml
-        cat todo-kube.yml
+        cat todo-kube-debug.yml
 
     - kubectl:
       cwd: deployment
