@@ -5,6 +5,7 @@ metadata:
   name: todo
   labels:
     name: todo
+  namespace: $WERCKER_GIT_BRANCH
 spec:
   replicas: ${TPL_REPLICAS:-3}
   template:
