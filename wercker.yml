@@ -107,7 +107,7 @@ kube-deploy-debug:
       name: generate kube file
       cwd: deployment
       code: |
-        cat todo-service.yml >> todo-kube-debug.yml
+        ./t.sh todo-service.yml >> todo-kube-debug.yml
         ./t.sh todo-deployment.template.yml >> todo-kube-debug.yml
         cat todo-kube-debug.yml
 
@@ -138,7 +138,7 @@ kube-deploy-production:
       name: generate kube file
       cwd: deployment
       code: |
-        cat todo-service.yml >> todo-kube.yml
+        ./t.sh todo-service.yml >> todo-kube.yml
         ./t.sh todo-deployment.template.yml >> todo-kube.yml
         cat todo-kube.yml
     
