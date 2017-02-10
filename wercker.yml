@@ -28,6 +28,10 @@ build:
 
 tests:
   steps:
+    - script:
+      name: upgrade packages
+      code: apt-get update && apt-get upgrade -y
+
     - install-packages:
       packages: libfreetype6 libfontconfig
 
@@ -107,13 +111,13 @@ kube-deploy-debug:
         ./t.sh todo-deployment.template.yml >> todo-kube-debug.yml
         cat todo-kube-debug.yml
 
-    - kubectl:
-      cwd: deployment
-      server: $KUBERNETES_MASTER
-      username: $KUBERNETES_USERNAME
-      password: $KUBERNETES_PASSWORD
-      insecure-skip-tls-verify: true
-      command: create namespace $WERCKER_GIT_BRANCH
+    #- kubectl:
+    #  cwd: deployment
+    #  server: $KUBERNETES_MASTER
+    #  username: $KUBERNETES_USERNAME
+    #  password: $KUBERNETES_PASSWORD
+    #  insecure-skip-tls-verify: true
+    #  command: create namespace $WERCKER_GIT_BRANCH
 
     - kubectl:
       cwd: deployment
@@ -138,14 +142,6 @@ kube-deploy-production:
         ./t.sh todo-deployment.template.yml >> todo-kube.yml
         cat todo-kube.yml
     
-    - kubectl:
-      cwd: deployment
-      server: $KUBERNETES_MASTER
-      username: $KUBERNETES_USERNAME
-      password: $KUBERNETES_PASSWORD
-      insecure-skip-tls-verify: true
-      command: create namespace $WERCKER_GIT_BRANCH
-
     - kubectl:
       cwd: deployment
       server: $KUBERNETES_MASTER
