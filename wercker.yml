@@ -13,6 +13,10 @@ dev:
 
 build:
   steps:
+    - script:
+      name: upgrade packages
+      code: apt-get update && apt-get upgrade -y
+
     - install-packages:
       packages: bzip2
 
@@ -24,6 +28,10 @@ build:
 
 tests:
   steps:
+    - script:
+      name: upgrade packages
+      code: apt-get update && apt-get upgrade -y
+
     - install-packages:
       packages: libfreetype6 libfontconfig
 
@@ -56,7 +64,7 @@ release-build:
 push-debug:
   steps:
     - internal/docker-push:
-      repository: quay.io/wercker/workflows-kubernetes-demo
+      repository: quay.io/strataconsulting/workflows-kubernetes-demo
       username: $DOCKER_USERNAME
       password: $DOCKER_PASSWORD
       registry: quay.io
@@ -86,47 +94,60 @@ push-release:
 
     - internal/docker-push:
       disable-sync: true
-      repository: quay.io/wercker/workflows-kubernetes-demo
+      repository: quay.io/strataconsulting/workflows-kubernetes-demo
       username: $DOCKER_USERNAME
       password: $DOCKER_PASSWORD
       registry: quay.io
       tag: release-$WERCKER_GIT_COMMIT
       cmd: nginx -g 'daemon off;'
 
-kube-deploy:
+kube-deploy-debug:
   steps:
-    - create-file:
-      name: Create ca.pem
-      cwd: deployment
-      filename: ca.pem
-      content: $CA_PEM
-
-    - create-file:
-      name: Create admin.pem
-      cwd: deployment
-      filename: admin.pem
-      content: $ADMIN_PEM
-
-    - create-file:
-      name: Create admin-key.pem
-      cwd: deployment
-      filename: admin-key.pem
-      content: $ADMIN_KEY_PEM        
-
     - script:
       name: generate kube file
       cwd: deployment
       code: |
-        cat todo-service.yml >> todo-kube.yml
-        ./t.sh todo-deployment.template.yml >> todo-kube.yml
-        cat todo-kube.yml
+        ./t.sh todo-service.yml >> todo-kube-debug.yml
+        ./t.sh todo-deployment.template.yml >> todo-kube-debug.yml
+        cat todo-kube-debug.yml
+
+    #- kubectl:
+    #  cwd: deployment
+    #  server: $KUBERNETES_MASTER
+    #  username: $KUBERNETES_USERNAME
+    #  password: $KUBERNETES_PASSWORD
+    #  insecure-skip-tls-verify: true
+    #  command: create namespace $WERCKER_GIT_BRANCH
 
     - kubectl:
       cwd: deployment
       server: $KUBERNETES_MASTER
-      certificate-authority: ca.pem
-      client-certificate: admin.pem
-      client-key: admin-key.pem
+      username: $KUBERNETES_USERNAME
+      password: $KUBERNETES_PASSWORD
+      insecure-skip-tls-verify: true
+      command: apply -f todo-kube-debug.yml
+
+    - script:
+      name: cleanup
+      cwd: deployment
+      code: rm -rf ca.pem admin.pem admin-key.pem todo-kube-debug.yml
+
+kube-deploy-production:
+  steps:
+    - script:
+      name: generate kube file
+      cwd: deployment
+      code: |
+        ./t.sh todo-service.yml >> todo-kube.yml
+        ./t.sh todo-deployment.template.yml >> todo-kube.yml
+        cat todo-kube.yml
+    
+    - kubectl:
+      cwd: deployment
+      server: $KUBERNETES_MASTER
+      username: $KUBERNETES_USERNAME
+      password: $KUBERNETES_PASSWORD
+      insecure-skip-tls-verify: true
       command: apply -f todo-kube.yml
 
     - script:
